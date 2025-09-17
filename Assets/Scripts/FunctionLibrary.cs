@@ -84,8 +84,8 @@ public static class FunctionLibrary
     }
     
     public delegate Vector3 Function (float u, float v, float t);
-    
-    static Dictionary<FunctionType, Function> functions = new Dictionary<FunctionType, Function>
+
+    private static readonly Dictionary<FunctionType, Function> Functionss = new Dictionary<FunctionType, Function>
     {
         { FunctionType.Wave, Wave},
         { FunctionType.MultiWave , MultiWave},
@@ -95,7 +95,30 @@ public static class FunctionLibrary
     };
 	
     public static Function GetFunction (FunctionType func) {
-        functions.TryGetValue(func, out Function function);
+        Functionss.TryGetValue(func, out Function function);
         return function;
+    }
+    
+    public static FunctionType GetNextFunctionName (FunctionType name) {
+        if ((int)name < Functionss.Count - 1) {
+            return name + 1;
+        }
+        else {
+            return 0;
+        }
+    }
+    
+    public static FunctionType GetRandomFunctionNameOtherThan (FunctionType name) {
+        var choice = (FunctionType)Random.Range(1, Functionss.Count);
+        return choice == name ? 0 : choice;
+    }
+
+    public static Vector3 Morph(
+        float u, float v, float t, Function from, Function to, float progress
+    )
+    {
+        return Vector3.LerpUnclamped(
+            from(u, v, t), to(u, v, t), SmoothStep(0f, 1f, progress)
+        );
     }
 }
