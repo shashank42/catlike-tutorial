@@ -1140,7 +1140,7 @@
     },
     "m_Name": "Add",
     "m_DrawState": {
-        "m_Expanded": true,
+        "m_Expanded": false,
         "m_Position": {
             "serializedVersion": "2",
             "x": -287.0,
