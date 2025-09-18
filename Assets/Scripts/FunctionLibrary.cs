@@ -64,7 +64,8 @@ public static class FunctionLibrary
         Vector3 p;
         // var r = 0.5f + 0.5f * Sin(PI * t);
         // float r = 0.9f + 0.1f * Sin(8f * PI * u);
-        float r = 0.9f + 0.1f * Sin(PI * (6f * u + 4f * v + t));
+        // float r = 0.9f + 0.1f * Sin(PI * (6f * u + 4f * v + t));
+        float r = 0.9f + 0.1f * Sin(PI * (12.0f * u + 8.0f * v + t));
         var s = r * Cos(PI * v / 2.0f);
         p.x = s * Sin(u * PI);
         p.y = r * Sin(PI * v / 2.0f);
@@ -73,8 +74,8 @@ public static class FunctionLibrary
     }
     
     public static Vector3 Torus (float u, float v, float t) {
-        float r1 = 0.7f + 0.1f * Sin(PI * (6f * u + 0.5f * t));
-        float r2 = 0.15f + 0.05f * Sin(PI * (8f * u + 4f * v + 2f * t));
+        float r1 = 0.7f + 0.1f * Sin(PI * (8.0f * u + 0.5f * t));
+        float r2 = 0.15f + 0.05f * Sin(PI * (16.0f * u + 8.0f * v + 3.0f * t));
         float s = r1 + r2 * Cos(PI * v);
         Vector3 p;
         p.x = s * Sin(PI * u);
@@ -85,7 +86,7 @@ public static class FunctionLibrary
     
     public delegate Vector3 Function (float u, float v, float t);
 
-    private static readonly Dictionary<FunctionType, Function> Functionss = new Dictionary<FunctionType, Function>
+    private static Dictionary<FunctionType, Function> Functionss = new Dictionary<FunctionType, Function>
     {
         { FunctionType.Wave, Wave},
         { FunctionType.MultiWave , MultiWave},
@@ -93,7 +94,9 @@ public static class FunctionLibrary
         {FunctionType.Sphere, Sphere},
         {FunctionType.Torus, Torus},
     };
-	
+    
+    public static int FunctionCount => Functionss.Count;
+
     public static Function GetFunction (FunctionType func) {
         Functionss.TryGetValue(func, out Function function);
         return function;
