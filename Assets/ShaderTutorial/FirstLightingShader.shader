@@ -21,11 +21,15 @@ Shader "Custom/My First Lighting Shader" {
 				"LightMode" = "ForwardBase"
 			}
 			CGPROGRAM
+				#pragma target 3.0
+			
 				#pragma vertex MyVertexProgram
 				#pragma fragment MyFragmentProgram
 				
-				#include "UnityStandardBRDF.cginc"
-				#include "UnityStandardUtils.cginc"
+				// #include "UnityStandardBRDF.cginc"
+				// #include "UnityStandardUtils.cginc"
+				// #include "UnityCG.cginc"
+				#include "UnityPBSLighting.cginc"
 				
 				float4 _Tint;
 				sampler2D _MainTex;
@@ -73,17 +77,26 @@ Shader "Custom/My First Lighting Shader" {
 						float3 albedo = tex2D(_MainTex, i.uv).rgb * _Tint.rgb;
 						float3 specularTint; // = albedo * _Metallic;
 						float oneMinusReflectivity; // = 1 - _Metallic;
-						float3 specular = lightColor *  pow(
-							DotClamped(halfVector, i.normal),
-							_Smoothness * 100
-						);
+						// float3 specular = lightColor *  pow(
+						// 	DotClamped(halfVector, i.normal),
+						// 	_Smoothness * 100
+						// );
 						
 						// albedo *= 1 - max(_SpecularTint.r, max(_SpecularTint.g, _SpecularTint.b));
 						albedo = DiffuseAndSpecularFromMetallic(
 							albedo, _Metallic, specularTint, oneMinusReflectivity
 						);
-						float3 diffuse = albedo * lightColor * DotClamped(lightDir, i.normal);
-						return float4(diffuse + specular, 1);
+						// float3 diffuse = albedo * lightColor * DotClamped(lightDir, i.normal);
+						// half4 BRDF1_Unity_PBS (half3 diffColor, half3 specColor, half oneMinusReflectivity, half smoothness,
+						//     float3 normal, float3 viewDir, UnityLight light, UnityIndirect gi);
+						UnityLight light;
+						light.color = lightColor;
+						light.dir = lightDir;
+						light.ndotl = DotClamped(i.normal, lightDir);
+						UnityIndirect indirectLight;
+						indirectLight.diffuse = 0;
+						indirectLight.specular = 0;
+						return UNITY_BRDF_PBS(albedo, specularTint, oneMinusReflectivity, _Smoothness, i.normal, viewDir, light, indirectLight);
 						return DotClamped(lightDir, i.normal);
 						return DotClamped(float3(0, 1, 0), i.normal);
 						i.normal = normalize(i.normal);
