@@ -9,6 +9,8 @@ sampler2D _MainTex;
 float4 _MainTex_ST;
 float _Smoothness;
 float _Metallic;
+sampler2D _HeightMap;
+float4 _HeightMap_TexelSize;
 
 struct VertexData
 {
@@ -89,16 +91,30 @@ UnityLight CreateLight(Interpolators i) {
     return light;
 }
 
+void InitializeFragmentNormal(inout Interpolators i) {
+    float2 du = float2(_HeightMap_TexelSize.x * 0.5, 0);
+    float u1 = tex2D(_HeightMap, i.uv - du);
+    float u2 = tex2D(_HeightMap, i.uv + du);
+
+    float2 dv = float2(0, _HeightMap_TexelSize.y * 0.5);
+    float v1 = tex2D(_HeightMap, i.uv - dv);
+    float v2 = tex2D(_HeightMap, i.uv + dv);
+
+    i.normal = float3(u1 - u2, 1, v1 - v2);
+    i.normal = normalize(i.normal);
+}
+
 float4 MyFragmentProgram(
     Interpolators i): SV_TARGET
 {
-    i.normal = normalize(i.normal);
+    InitializeFragmentNormal(i);
     float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
     // float3 specular = _SpecularTint.rgb * lightColor *  pow(
     // 	DotClamped(halfVector, i.normal),
     // 	_Smoothness * 100
     // );
     float3 albedo = tex2D(_MainTex, i.uv).rgb * _Tint.rgb;
+    // albedo *= tex2D(_HeightMap, i.uv);
     float3 specularTint; // = albedo * _Metallic;
     float oneMinusReflectivity; // = 1 - _Metallic;
     // float3 specular = lightColor *  pow(
